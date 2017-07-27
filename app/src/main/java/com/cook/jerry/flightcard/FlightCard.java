@@ -1,3 +1,5 @@
+package com.cook.jerry.flightcard;
+
 /**
  * Created by jerry on 7/27/2017.
  */
