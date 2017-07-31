@@ -6,12 +6,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.Cursor;
 
+import com.cook.jerry.flightcard.FlightCard;
+
+import java.util.ArrayList;
+
 /**
  * Created by jerry on 7/27/2017.
  */
 
 public class FlightDbHelper extends SQLiteOpenHelper {
-
     private static final int DATABASE_VERSION = 1;
     private static final String  DATABASE_NAME = "flightCardTracker.db";
     private static final String TABLE_NAME = "flightCards";
@@ -46,6 +49,19 @@ public class FlightDbHelper extends SQLiteOpenHelper {
     public static final String FLIGHTCARDTRACKER_COLUMN_PASSENGER_18  = "passenger18";
     public static final String FLIGHTCARDTRACKER_COLUMN_PASSENGER_19 = "passenger19";
     public static final String FLIGHTCARDTRACKER_COLUMN_PASSENGER_20 = "passenger20";
+
+    public static final String TABLE_LEASE_NAME = "leaseTable";
+    public static final String LEASETABLE_COLUMN_ID = "_id";
+    public static final String LEASETABLE_COLUMN_LEASE = "lease";
+
+    public static final String TABLE_PLANES_NAME = "planesTable";
+    public static final String PLANESTABLE_COLUMN_ID= "_id";
+    public static final String PLANESTABLE_COLUMN_PLANETYPES = "planeTypes";
+
+    public static final String TABLE_PILOT_NAME = "pilotTable";
+    public static final String PILOTTABLE_COLUMN_ID = "_id";
+    public static final String PILOTTABLE_COLUMN_PILOTS = "pilots";
+
     private SQLiteDatabase database;
 
 
@@ -54,7 +70,7 @@ public class FlightDbHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onCreate(SQLiteDatabase database){
-        String createTable = ("CREATE TABLE " + TABLE_NAME + "( "
+        String createTable = ("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "( "
                 +FLIGHTCARDTRACKER_COLUMN_ID + " INTEGER PRIMARY KEY, "
                 +FLIGHTCARDTRACKER_COLUMN_DATE_OUT + " TEXT, "
                 +FLIGHTCARDTRACKER_COLUMN_DATE_IN + " TEXT, "
@@ -87,7 +103,46 @@ public class FlightDbHelper extends SQLiteOpenHelper {
                 +FLIGHTCARDTRACKER_COLUMN_PASSENGER_19 + " TEXT, "
                 +FLIGHTCARDTRACKER_COLUMN_PASSENGER_20 + " TEXT )");
         database.execSQL(createTable);
+
+        String createPlaneTable = ("CREATE TABLE IF NOT EXISTS " + TABLE_PLANES_NAME + "( "
+                +PLANESTABLE_COLUMN_ID + " INTEGER PRIMARY KEY, "
+                +PLANESTABLE_COLUMN_PLANETYPES + " TEXT )");
+       database.execSQL(createPlaneTable);
+
+        String createLeaseTable = ("CREATE TABLE IF NOT EXISTS " + TABLE_LEASE_NAME + "( "
+                +LEASETABLE_COLUMN_ID + " INTEGER PRIMARY KEY, "
+                +LEASETABLE_COLUMN_LEASE + " TEXT )");
+        database.execSQL(createLeaseTable);
+
+        String createPilotTable = ("CREATE TABLE IF NOT EXISTS " + TABLE_PILOT_NAME + "( "
+               +PILOTTABLE_COLUMN_ID + " INTEGER PRIMARY KEY, "
+               +PILOTTABLE_COLUMN_PILOTS + " TEXT )");
+        database.execSQL(createPilotTable);
+
+        database.execSQL("INSERT INTO "+TABLE_PILOT_NAME + " (pilots) VALUES ('Trever Engler')");
+        database.execSQL("INSERT INTO "+TABLE_PILOT_NAME + " (pilots) VALUES ('Ryan Walter')");
+
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('SRW, Inc.')");
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('NorthStar Bank')");
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('NFGI')");
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('WMCB')");
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('Deland Financial Services')");
+        database.execSQL("INSERT INTO "+TABLE_LEASE_NAME + " (lease) VALUES ('Gemini Group, Inc.')");
+
+        database.execSQL("INSERT INTO "+TABLE_PLANES_NAME + " (planeTypes) VALUES ('Jet')");
+        database.execSQL("INSERT INTO "+TABLE_PLANES_NAME + " (planeTypes) VALUES ('Caravan')");
+        database.execSQL("INSERT INTO "+TABLE_PLANES_NAME + " (planeTypes) VALUES ('Caravan B')");
+        database.execSQL("INSERT INTO "+TABLE_PLANES_NAME + " (planeTypes) VALUES ('Navajo')");
+        database.execSQL("INSERT INTO "+TABLE_PLANES_NAME + " (planeTypes) VALUES ('Baron')");
+
+
+
+
+
+
     }
+
+
 
 
 
@@ -95,7 +150,11 @@ public class FlightDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
         db.execSQL("DROP TABLE IF EXISTS "+ TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS "+ TABLE_LEASE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LEASE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS "+ TABLE_PILOT_NAME);
         onCreate(db);
+
     }
 
     public void saveRecord(String dateOut, String dateIn,String flightType, String lease,
@@ -143,11 +202,48 @@ public class FlightDbHelper extends SQLiteOpenHelper {
         database.insert(TABLE_NAME,null,contentValues);
 
     }
-    public Cursor getRecords(){
-        database = this.getReadableDatabase();
-        return database.rawQuery("SELECT * FROM "+ TABLE_NAME,null);
+    public void savePlaneType(String planeType){
+        database = this.getWritableDatabase();
+        database= this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(PLANESTABLE_COLUMN_PLANETYPES,planeType);
+        database.insert(TABLE_PLANES_NAME,null,contentValues);
 
     }
+   /* public ArrayList<FlightCard> getRecords(){
+        database = this.getReadableDatabase();
+        Cursor cusor = database.rawQuery("SELECT * FROM "+ TABLE_NAME,null);
+        while(cusor != null){
 
+        }
+    }*/
 
+    public ArrayList<String> getPlaneTypes(){
+        ArrayList<String> planes = new ArrayList();
+        database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM " + TABLE_PLANES_NAME,null);
+
+           while(cursor.moveToNext()){
+               String plane = cursor.getString(cursor.getColumnIndex("planeTypes"));
+               planes.add(plane);
+           }
+
+        database.close();
+        cursor.close();
+        return planes;
+    }
+    public ArrayList<String> getPilots(){
+        ArrayList<String> pilots = new ArrayList();
+        database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM "+TABLE_PILOT_NAME,null);
+
+        while(cursor.moveToNext()){
+            String pilot = cursor.getString(cursor.getColumnIndex("pilots"));
+            pilots.add(pilot);
+
+        }
+        database.close();
+        cursor.close();
+        return pilots;
+    }
 }

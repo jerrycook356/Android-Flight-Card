@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">FlightCard</string>
+    <string-array name = "flight_type_array">
+        <item>Whole Day</item>
+        <item>Half Day</item>
+    </string-array>
+
 </resources>
